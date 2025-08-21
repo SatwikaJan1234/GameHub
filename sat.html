@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maze Game – HTML/CSS/JS</title>
+  <style>
+    :root {
+      --bg: #0f1222;
+      --card: #171a2f;
+      --ink: #e7e9ff;
+      --muted: #a8b0d3;
+      --accent: #6ae3ff;
+      --accent2: #77ff9b;
+      --danger: #ff7a7a;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: radial-gradient(1200px 600px at 20% -10%, #1b2042, #0f1222); color: var(--ink);
+      font: 500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+      min-height: 100vh; display: grid; place-items: center; padding: 18px;
+    }
+    .app { width: min(1100px, 94vw); }
+    header { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand .dot { width: 14px; height: 14px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow: 0 0 0 4px rgba(106, 227, 255, 0.15); }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0)); padding: 16px; border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+    .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .controls > * { margin: 2px 0; }
+    label { color: var(--muted); font-size: 14px; }
+    select, button, input[type=checkbox] + span {
+      background: var(--card); color: var(--ink); border: 1px solid rgba(255,255,255,.1);
+      padding: 10px 12px; border-radius: 12px; outline: none; transition: .2s ease; box-shadow: inset 0 -12px 20px rgba(255,255,255,.02);
+    }
+    select:hover, button:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.25); }
+    button.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #001720; border: none; font-weight: 700; }
+    button.ghost { background: transparent; border: 1px dashed rgba(255,255,255,.2); color: var(--muted); }
+
+    .layout { display: grid; grid-template-columns: 340px 1fr; gap: 18px; margin-top: 16px; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+    .sidebar { display: grid; gap: 12px; align-content: start; }
+    .stat { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--card); border-radius: 12px; border: 1px solid rgba(255,255,255,.08); }
+    .muted { color: var(--muted); }
+
+    canvas { width: 100%; height: auto; display: block; border-radius: var(--radius); background: #0a0c18; border: 1px solid rgba(255,255,255,.08); }
+
+    .keys { display: grid; gap: 8px; grid-template-columns: repeat(3, 1fr); width: 220px; margin: 8px auto 0; }
+    .keys button { padding: 12px; border-radius: 14px; background: #12162a; border: 1px solid rgba(255,255,255,.08); }
+
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+    .legend .swatch { width: 14px; height: 14px; display: inline-block; border-radius: 4px; margin-right: 6px; vertical-align: -2px; }
+    .swatch.player { background: var(--accent2); }
+    .swatch.goal { background: var(--danger); }
+    .swatch.path { background: #ffd166; }
+
+    .footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="card">
+      <div class="brand">
+        <span class="dot"></span>
+        <h1 style="margin:0;font-size:20px">Maze Game</h1>
+        <span class="muted">HTML • CSS • JS</span>
+      </div>
+      <div class="controls">
+        <label>Difficulty
+          <select id="difficulty">
+            <option value="easy">Easy (15×10)</option>
+            <option value="medium" selected>Medium (25×15)</option>
+            <option value="hard">Hard (39×23)</option>
+            <option value="insane">Insane (55×31)</option>
+          </select>
+        </label>
+        <label>Grid Size
+          <select id="cellSize">
+            <option value="24">24 px</option>
+            <option value="28" selected>28 px</option>
+            <option value="32">32 px</option>
+            <option value="36">36 px</option>
+          </select>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="showPath" /> <span>Show shortest path</span>
+        </label>
+        <button id="newMaze" class="primary">New Maze</button>
+        <button id="solve" class="ghost">Auto‑solve</button>
+        <button id="reset" class="ghost">Reset Player</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="card">
+          <strong>How to play</strong>
+          <p class="muted" style="margin:.5rem 0 0">Use <b>WASD</b> or <b>arrow keys</b> to move the green square (player) to the red square (goal). Avoid walls. Toggle the shortest path hint or use Auto‑solve to see the answer.</p>
+          <div class="legend" style="margin-top:8px">
+            <span><i class="swatch player"></i>Player</span>
+            <span><i class="swatch goal"></i>Goal</span>
+            <span><i class="swatch path"></i>Shortest path</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="stat"><span class="muted">Timer</span><strong id="timer">00:00</strong></div>
+          <div class="stat"><span class="muted">Moves</span><strong id="moves">0</strong></div>
+          <div class="stat"><span class="muted">Grid</span><strong id="gridLabel">25 × 15</strong></div>
+        </div>
+        <div class="card">
+          <strong>Touch Controls</strong>
+          <div class="keys">
+            <span></span>
+            <button data-dir="up">▲</button>
+            <span></span>
+            <button data-dir="left">◀</button>
+            <button data-dir="down">▼</button>
+            <button data-dir="right">▶</button>
+          </div>
+        </div>
+        <div class="footer">© Maze Generator (DFS) + BFS pathfinding</div>
+      </aside>
+
+      <main class="card">
+        <canvas id="maze"></canvas>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // ===== Utility helpers =====
+    const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    // ===== Maze data structures =====
+    class Cell {
+      constructor(x, y) {
+        this.x = x; this.y = y;
+        this.walls = { top: true, right: true, bottom: true, left: true };
+        this.visited = false;
+      }
+    }
+
+    class Maze {
+      constructor(cols, rows) {
+        this.cols = cols; this.rows = rows;
+        this.grid = Array.from({ length: rows }, (_, y) => Array.from({ length: cols }, (_, x) => new Cell(x, y)));
+        this.start = { x: 0, y: 0 };
+        this.goal = { x: cols - 1, y: rows - 1 };
+      }
+
+      neighbors(x, y) {
+        const deltas = [ [0,-1,'top','bottom'], [1,0,'right','left'], [0,1,'bottom','top'], [-1,0,'left','right'] ];
+        const res = [];
+        for (const [dx, dy, w, ow] of deltas) {
+          const nx = x + dx, ny = y + dy;
+          if (nx>=0 && ny>=0 && nx<this.cols && ny<this.rows) res.push([nx, ny, w, ow]);
+        }
+        return res;
+      }
+
+      generate(seedRandom=Math.random) {
+        // Iterative DFS (recursive backtracker)
+        const stack = [];
+        const startCell = this.grid[0][0];
+        startCell.visited = true; stack.push(startCell);
+        while (stack.length) {
+          const current = stack[stack.length - 1];
+          const nbs = this.neighbors(current.x, current.y)
+            .map(([nx, ny, w, ow]) => ({ nx, ny, w, ow, cell: this.grid[ny][nx] }))
+            .filter(n => !n.cell.visited);
+          if (nbs.length === 0) { stack.pop(); continue; }
+          const next = nbs[Math.floor(seedRandom() * nbs.length)];
+          // remove walls between current and next
+          current.walls[next.w] = false;
+          next.cell.walls[next.ow] = false;
+          next.cell.visited = true;
+          stack.push(next.cell);
+        }
+        // Ensure start/goal cells are open
+        this.grid[this.start.y][this.start.x].walls.left = false;
+        this.grid[this.goal.y][this.goal.x].walls.right = false;
+      }
+
+      // BFS shortest path from start to goal (returns list of {x,y})
+      shortestPath(from=this.start, to=this.goal) {
+        const q = [from];
+        const key = (p)=>`${p.x},${p.y}`;
+        const seen = new Set([key(from)]);
+        const parent = new Map();
+        while (q.length) {
+          const p = q.shift();
+          if (p.x === to.x && p.y === to.y) break;
+          const cell = this.grid[p.y][p.x];
+          const candidates = [];
+          if (!cell.walls.top) candidates.push({x:p.x,y:p.y-1});
+          if (!cell.walls.right) candidates.push({x:p.x+1,y:p.y});
+          if (!cell.walls.bottom) candidates.push({x:p.x,y:p.y+1});
+          if (!cell.walls.left) candidates.push({x:p.x-1,y:p.y});
+          for (const n of candidates) {
+            const k = key(n); if (seen.has(k)) continue;
+            seen.add(k); parent.set(k, p); q.push(n);
+          }
+        }
+        // reconstruct
+        const path = [];
+        let cur = to; const toKey = key(to);
+        if (!parent.has(toKey) && !(from.x===to.x && from.y===to.y)) return [];
+        while (cur) {
+          path.push(cur);
+          const k = key(cur);
+          cur = parent.get(k);
+        }
+        return path.reverse();
+      }
+    }
+
+    // ===== Rendering & Game State =====
+    const canvas = document.getElementById('maze');
+    const ctx = canvas.getContext('2d');
+    const timerEl = document.getElementById('timer');
+    const movesEl = document.getElementById('moves');
+    const gridLabel = document.getElementById('gridLabel');
+
+    const difficultyEl = document.getElementById('difficulty');
+    const cellSizeEl = document.getElementById('cellSize');
+    const showPathEl = document.getElementById('showPath');
+    const newMazeBtn = document.getElementById('newMaze');
+    const solveBtn = document.getElementById('solve');
+    const resetBtn = document.getElementById('reset');
+
+    const touchBtns = document.querySelectorAll('.keys button');
+
+    let maze, cols, rows, cellSize, player, goal, path = [], solveAnim = null;
+    let moves = 0, startTime = null, timerId = null, won = false;
+
+    function chooseSize() {
+      const diff = difficultyEl.value;
+      const map = {
+        easy: [15, 10],
+        medium: [25, 15],
+        hard: [39, 23],
+        insane: [55, 31]
+      };
+      [cols, rows] = map[diff];
+      cellSize = parseInt(cellSizeEl.value, 10);
+      gridLabel.textContent = `${cols} × ${rows}`;
+    }
+
+    function resizeCanvas() {
+      // Account for device pixel ratio for crisp lines
+      const dpr = window.devicePixelRatio || 1;
+      const maxW = document.querySelector('main').clientWidth - 24; // padding
+      const w = clamp(cols * cellSize, 260, maxW);
+      const h = Math.round(w * (rows/cols));
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function draw() {
+      resizeCanvas();
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      const w = parseFloat(getComputedStyle(canvas).width);
+      const h = parseFloat(getComputedStyle(canvas).height);
+      const sx = w / cols; const sy = h / rows;
+
+      // Draw background grid cells slight tint
+      ctx.fillStyle = '#0d1022';
+      ctx.fillRect(0,0,w,h);
+
+      // Draw walls
+      ctx.lineWidth = Math.max(2, Math.min(sx, sy) * 0.12);
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.lineCap = 'round';
+      for (let y=0; y<rows; y++) {
+        for (let x=0; x<cols; x++) {
+          const c = maze.grid[y][x];
+          const px = x * sx, py = y * sy;
+          ctx.beginPath();
+          if (c.walls.top)   { ctx.moveTo(px, py); ctx.lineTo(px+sx, py); }
+          if (c.walls.right) { ctx.moveTo(px+sx, py); ctx.lineTo(px+sx, py+sy); }
+          if (c.walls.bottom){ ctx.moveTo(px, py+sy); ctx.lineTo(px+sx, py+sy); }
+          if (c.walls.left)  { ctx.moveTo(px, py); ctx.lineTo(px, py+sy); }
+          ctx.stroke();
+        }
+      }
+
+      // Optional shortest path hint
+      if (showPathEl.checked && path.length) {
+        ctx.fillStyle = '#ffd166';
+        for (const p of path) {
+          ctx.fillRect(p.x*sx + sx*0.25, p.y*sy + sy*0.25, sx*0.5, sy*0.5);
+        }
+      }
+
+      // Goal
+      ctx.fillStyle = '#ff6b6b';
+      ctx.fillRect(goal.x*sx + sx*0.15, goal.y*sy + sy*0.15, sx*0.7, sy*0.7);
+
+      // Player
+      ctx.fillStyle = '#77ff9b';
+      ctx.fillRect(player.x*sx + sx*0.18, player.y*sy + sy*0.18, sx*0.64, sy*0.64);
+    }
+
+    function newGame() {
+      chooseSize();
+      maze = new Maze(cols, rows);
+      // Optional seeded randomness for reproducibility (here: time-based)
+      const seed = (Date.now() % 100000) / 100000;
+      let s = seed; const seeded = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+      maze.generate(seeded);
+      player = { x: 0, y: 0 };
+      goal = { x: cols-1, y: rows-1 };
+      path = maze.shortestPath(player, goal);
+      moves = 0; movesEl.textContent = '0';
+      won = false;
+      startTimer();
+      draw();
+    }
+
+    function startTimer() {
+      if (timerId) clearInterval(timerId);
+      startTime = Date.now();
+      timerId = setInterval(() => {
+        const secs = Math.floor((Date.now() - startTime)/1000);
+        const m = String(Math.floor(secs/60)).padStart(2,'0');
+        const s = String(secs%60).padStart(2,'0');
+        timerEl.textContent = `${m}:${s}`;
+      }, 200);
+    }
+
+    function stopTimer() { if (timerId) clearInterval(timerId); timerId = null; }
+
+    function tryMove(dx, dy) {
+      if (won) return;
+      const { x, y } = player;
+      const cell = maze.grid[y][x];
+      if (dx === 0 && dy === -1 && !cell.walls.top) player.y--;
+      else if (dx === 1 && dy === 0 && !cell.walls.right) player.x++;
+      else if (dx === 0 && dy === 1 && !cell.walls.bottom) player.y++;
+      else if (dx === -1 && dy === 0 && !cell.walls.left) player.x--;
+      else return; // blocked
+      moves++; movesEl.textContent = String(moves);
+      path = maze.shortestPath(player, goal);
+      draw();
+      if (player.x === goal.x && player.y === goal.y) win();
+    }
+
+    function win() {
+      won = true; stopTimer();
+      // small celebration animation
+      const w = parseFloat(getComputedStyle(canvas).width);
+      const h = parseFloat(getComputedStyle(canvas).height);
+      const msg = '✨ You Win! ✨';
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fillRect(0,0,w,h);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 42px system-ui';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(msg, w/2, h/2);
+      ctx.restore();
+    }
+
+    // Auto-solve animation along shortest path
+    async function autoSolve() {
+      if (won) return;
+      const p = maze.shortestPath(player, goal);
+      if (!p.length) return;
+      for (let i=1; i<p.length; i++) {
+        await sleep(30);
+        player = { ...p[i] };
+        moves++; movesEl.textContent = String(moves);
+        draw();
+      }
+      win();
+    }
+
+    // ===== Event listeners =====
+    window.addEventListener('resize', draw);
+
+    document.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      if (['arrowup','w'].includes(k)) { e.preventDefault(); tryMove(0,-1); }
+      else if (['arrowright','d'].includes(k)) { e.preventDefault(); tryMove(1,0); }
+      else if (['arrowdown','s'].includes(k)) { e.preventDefault(); tryMove(0,1); }
+      else if (['arrowleft','a'].includes(k)) { e.preventDefault(); tryMove(-1,0); }
+      else if (k === 'r') { newGame(); }
+    });
+
+    showPathEl.addEventListener('change', draw);
+    newMazeBtn.addEventListener('click', newGame);
+    resetBtn.addEventListener('click', () => { player = {x:0,y:0}; moves = 0; movesEl.textContent = '0'; startTimer(); draw(); });
+    solveBtn.addEventListener('click', autoSolve);
+
+    touchBtns.forEach(btn => btn.addEventListener('click', () => {
+      const dir = btn.getAttribute('data-dir');
+      if (dir === 'up') tryMove(0,-1);
+      if (dir === 'right') tryMove(1,0);
+      if (dir === 'down') tryMove(0,1);
+      if (dir === 'left') tryMove(-1,0);
+    }));
+
+    // ===== Start the first game =====
+    newGame();
+  </script>
+</body>
+</html>
