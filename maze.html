@@ -5,149 +5,147 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Maze Game</title>
   <style>
-   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-
-    body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; margin: 0; padding: 0; }
-
-
-@keyframes gradientBG {
-0% { background-position: 0% 50%; }
-50% { background-position: 100% 50%; }
-100% { background-position: 0% 50%; }
-} #info { margin: 10px; font-size: 18px; }
-    .touch-controls { display: flex; justify-content: center; margin-top: 15px; }
-    .touch-controls div { display: grid; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(3, 50px); gap: 5px; }
-    .touch-controls button { width: 50px; height: 50px; font-size: 20px; }
     body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: linear-gradient(135deg, #ADD8E6, #6495ED); /* Blue gradient */
-  margin: 0;
-  padding: 0;
-  color: #333; /* Darker text for better contrast */
- }
- 
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #ADD8E6, #6495ED);
+      margin: 0;
+      padding: 0;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
- canvas {
-  display: block;
-  margin: 20px auto;
-  background: #fff;
-  border: 2px solid #2c3e50; /* Darker border */
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
- }
- 
+    h1 {
+      margin: 15px 0;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+    }
 
- .controls {
-  margin: 20px; /* Increased margin */
- }
- 
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0 20px;
+    }
 
- label {
-  margin-right: 15px;
-  font-weight: bold;
- }
- 
+    label {
+      font-weight: bold;
+      margin-right: 5px;
+    }
 
- select {
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #2c3e50;
- }
- 
+    select, button {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
 
- button {
-  margin: 5px;
-  padding: 10px 20px; /* Increased padding */
-  cursor: pointer;
-  border-radius: 8px; /* More rounded corners */
-  border: none;
-  background-color: #3498db; /* Blue button */
-  color: white;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
- }
- 
+    button {
+      background-color: #3498db;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
- button:hover {
-  background-color: #2980b9;
- }
- 
+    button:hover {
+      background-color: #2980b9;
+    }
 
- #info {
-  margin: 15px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #555;
- }
- 
+    #info {
+      font-size: 1rem;
+      margin: 10px 0;
+      font-weight: bold;
+    }
 
- .touch-controls {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
- }
- 
+    canvas {
+      max-width: 95vw;
+      height: auto;
+      background: #fff;
+      border: 2px solid #2c3e50;
+      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+    }
 
- .touch-controls div {
-  display: grid;
-  grid-template-columns: repeat(3, 60px);
-  grid-template-rows: repeat(3, 60px);
-  gap: 8px;
- }
- 
+    .touch-controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
 
- .touch-controls button {
-  width: 60px;
-  height: 60px;
-  font-size: 22px;
-  border-radius: 10px;
-  border: none;
-  background-color: #3498db;
-  color: white;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
- }
- 
+    .touch-controls div {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      gap: 8px;
+    }
 
- .touch-controls button:hover {
-  background-color: #2980b9;
- }
- #winPopup {
-position: fixed;
-top: 0; left: 0;
-width: 100%; height: 100%;
-background: rgba(0,0,0,0.6);
-display: flex;
-align-items: center;
-justify-content: center;
-visibility: hidden;
-opacity: 0;
-transition: opacity 0.3s;
-}
-#winPopup.show {
-visibility: visible;
-opacity: 1;
-}
-#winPopupContent {
-background: white;
-padding: 30px;
-border-radius: 12px;
-text-align: center;
-animation: popupScale 0.4s ease;
-}
-@keyframes popupScale {
-from { transform: scale(0.5); opacity: 0; }
-to { transform: scale(1); opacity: 1; }
-}
-#confetti {
-position: fixed;
-top: 0; left: 0;
-width: 100%; height: 100%;
-pointer-events: none;
-overflow: hidden;
-}
-  </style>
+    .touch-controls button {
+      width: 60px;
+      height: 60px;
+      font-size: 22px;
+      border-radius: 10px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    .touch-controls button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Popup */
+    #winPopup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #winPopup.show { visibility: visible; opacity: 1; }
+    #winPopupContent {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 90%;
+    }
+
+    #confetti {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    /* 📱 Mobile tweaks */
+    @media (max-width: 600px) {
+      .controls {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .touch-controls div {
+        grid-template-columns: repeat(3, 50px);
+        grid-template-rows: repeat(3, 50px);
+      }
+      .touch-controls button {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+      }
+    }</style>
 </head>
 <body>
   <h1>Maze Game</h1>

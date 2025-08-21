@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Responsive Ping Pong Game</title>
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    canvas {
+      border: 2px solid #fff;
+      background: #111;
+      width: 90vw;   /* responsive width */
+      height: 70vh;  /* responsive height */
+      max-width: 800px;
+      max-height: 600px;
+      touch-action: none; /* disable page scrolling when touching */
+    }
+
+    #replayBtn {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #2575fc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #controls {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .ctrl-btn {
+      padding: 15px 25px;
+      font-size: 20px;
+      font-weight: bold;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .ctrl-btn:active {
+      background: #666;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <canvas id="gameCanvas"></canvas>
+    <div style="text-align:center;">
+      <button id="replayBtn" onclick="restartGame()">🔄 Replay</button>
+    </div>
+    <!-- On-screen controls for mobile -->
+    <div id="controls">
+      <button class="ctrl-btn" id="leftBtn">⬅ Left</button>
+      <button class="ctrl-btn" id="rightBtn">➡ Right</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Adjust canvas to CSS size
+    function resizeCanvas() {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // Game variables (relative to canvas size)
+    let paddleWidth = canvas.width * 0.15;
+    let paddleHeight = canvas.height * 0.03;
+    let paddleX = (canvas.width - paddleWidth) / 2;
+    let paddleSpeed = canvas.width * 0.015;
+
+    let ballRadius = canvas.width * 0.02;
+    let ballX = canvas.width / 2;
+    let ballY = canvas.height / 2;
+    let ballDX = canvas.width * 0.007;
+    let ballDY = -canvas.height * 0.01;
+
+    let rightPressed = false, leftPressed = false;
+    let score = 0;
+    let gameOver = false;
+
+    // Draw paddle
+    function drawPaddle() {
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
+    }
+
+    // Draw ball
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+      ctx.fillStyle = "#ff4757";
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    // Draw score
+    function drawScore() {
+      ctx.font = `${canvas.width * 0.04}px Arial`;
+      ctx.fillStyle = "#fff";
+      ctx.fillText("Score: " + score, 10, 30);
+    }
+
+    // Draw game over
+    function drawGameOver() {
+      ctx.font = `${canvas.width * 0.08}px Arial`;
+      ctx.fillStyle = "red";
+      ctx.fillText("GAME OVER", canvas.width / 2 - canvas.width * 0.2, canvas.height / 2);
+    }
+
+    // Update game objects
+    function update() {
+      if (gameOver) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      drawPaddle();
+      drawBall();
+      drawScore();
+
+      // Move paddle
+      if (rightPressed && paddleX < canvas.width - paddleWidth) {
+        paddleX += paddleSpeed;
+      } else if (leftPressed && paddleX > 0) {
+        paddleX -= paddleSpeed;
+      }
+
+      // Move ball
+      ballX += ballDX;
+      ballY += ballDY;
+
+      // Bounce off walls
+      if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
+        ballDX = -ballDX;
+      }
+      if (ballY - ballRadius < 0) {
+        ballDY = -ballDY;
+      }
+
+      // Paddle collision
+      if (
+        ballY + ballRadius >= canvas.height - paddleHeight - 10 &&
+        ballX > paddleX &&
+        ballX < paddleX + paddleWidth
+      ) {
+        ballDY = -ballDY;
+        score++;
+      }
+
+      // Game Over
+      if (ballY + ballRadius > canvas.height) {
+        gameOver = true;
+        drawGameOver();
+        document.getElementById("replayBtn").style.display = "inline-block";
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    // Keyboard controls
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") rightPressed = true;
+      if (e.key === "ArrowLeft") leftPressed = true;
+    });
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowRight") rightPressed = false;
+      if (e.key === "ArrowLeft") leftPressed = false;
+    });
+
+  // Keyboard controls
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft" || e.key === "Left") leftPressed = true;
+  if (e.key === "ArrowRight" || e.key === "Right") rightPressed = true;
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "ArrowLeft" || e.key === "Left") leftPressed = false;
+  if (e.key === "ArrowRight" || e.key === "Right") rightPressed = false;
+});
+
+// Mobile button controls (use same flags like keyboard)
+const leftBtn = document.getElementById("leftBtn");
+const rightBtn = document.getElementById("rightBtn");
+
+["mousedown", "touchstart"].forEach(evt =>
+  leftBtn.addEventListener(evt, (e) => {
+    e.preventDefault();
+    leftPressed = true;
+  }, { passive: false })
+);
+
+["mouseup", "touchend"].forEach(evt =>
+  leftBtn.addEventListener(evt, (e) => {
+    e.preventDefault();
+    leftPressed = false;
+  }, { passive: false })
+);
+
+["mousedown", "touchstart"].forEach(evt =>
+  rightBtn.addEventListener(evt, (e) => {
+    e.preventDefault();
+    rightPressed = true;
+  }, { passive: false })
+);
+
+["mouseup", "touchend"].forEach(evt =>
+  rightBtn.addEventListener(evt, (e) => {
+    e.preventDefault();
+    rightPressed = false;
+  }, { passive: false })
+);
+
+    // Touch drag paddle
+    canvas.addEventListener("touchmove", (e) => {
+      let touch = e.touches[0];
+      let rect = canvas.getBoundingClientRect();
+      let relativeX = touch.clientX - rect.left;
+      paddleX = relativeX - paddleWidth / 2;
+
+      // Keep inside canvas
+      if (paddleX < 0) paddleX = 0;
+      if (paddleX + paddleWidth > canvas.width) paddleX = canvas.width - paddleWidth;
+    });
+
+    // Restart game
+    function restartGame() {
+      score = 0;
+      paddleWidth = canvas.width * 0.15;
+      paddleHeight = canvas.height * 0.03;
+      paddleX = (canvas.width - paddleWidth) / 2;
+      paddleSpeed = canvas.width * 0.015;
+
+      ballRadius = canvas.width * 0.02;
+      ballX = canvas.width / 2;
+      ballY = canvas.height / 2;
+      ballDX = canvas.width * 0.007;
+      ballDY = -canvas.height * 0.01;
+
+      gameOver = false;
+      document.getElementById("replayBtn").style.display = "none";
+      update();
+    }
+
+    update();
+  </script>
+</body>
+</html>

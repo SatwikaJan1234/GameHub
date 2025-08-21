@@ -4,66 +4,150 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sudoku</title>
-  <style>
-    :root{
-      --bg: #0f1222;
-      --panel: #171a2f;
-      --ink: #e7e9ff;
-      --muted: #a8b0d3;
-      --accent: #6ae3ff;
-      --accent2:#77ff9b;
-      --warn:#ffb703;
-      --danger:#ff6b6b;
-      --radius: 16px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;background:radial-gradient(1200px 600px at 20% -10%, #1b2042, #0f1222);font:500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;color:var(--ink);}
-    .app{width:min(1100px,94vw)}
-    header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-    .brand{display:flex;align-items:center;gap:10px}
-    .brand .dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 0 4px rgba(106,227,255,.15)}
-    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    select,button{background:var(--panel);color:var(--ink);border:1px solid rgba(255,255,255,.08);padding:10px 12px;border-radius:12px;outline:none;transition:.2s ease;box-shadow:inset 0 -12px 20px rgba(255,255,255,.02)}
-    button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#001720;border:none;font-weight:700}
-    button:hover,select:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.25)}
+<style>
+  :root{
+  --bg: #0f1222;
+  --panel: #171a2f;
+  --ink: #e7e9ff;
+  --muted: #a8b0d3;
+  --accent: #6ae3ff;
+  --accent2:#77ff9b;
+  --warn:#ffb703;
+  --danger:#ff6b6b;
+  --radius: 16px;
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  background:radial-gradient(1200px 600px at 20% -10%, #1b2042, #0f1222);
+  font:500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+  color:var(--ink);
+}
+.app{width:min(1100px,94vw)}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 0 4px rgba(106,227,255,.15)}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,button{
+  background:var(--panel);
+  color:var(--ink);
+  border:1px solid rgba(255,255,255,.08);
+  padding:10px 12px;
+  border-radius:12px;
+  outline:none;
+  transition:.2s ease;
+  box-shadow:inset 0 -12px 20px rgba(255,255,255,.02)
+}
+button.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#001720;border:none;font-weight:700}
+button:hover,select:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.25)}
 
-    .layout{display:grid;grid-template-columns: 420px 1fr;gap:18px}
-    @media (max-width: 980px){.layout{grid-template-columns:1fr}}
+.layout{display:grid;grid-template-columns: 420px 1fr;gap:18px}
+@media (max-width: 980px){
+  .layout{grid-template-columns:1fr}
+}
 
-    .card{background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);box-shadow:var(--shadow)}
-    .muted{color:var(--muted)}
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+  padding:16px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow)
+}
+.muted{color:var(--muted)}
 
-    /* Sudoku board */
-    .board{width:420px;max-width:94vw;aspect-ratio:1;border-radius:12px;background:#0a0c18;border:1px solid rgba(255,255,255,.08);display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);overflow:hidden}
-    .cell{position:relative;border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;cursor:pointer;user-select:none}
-    .cell[data-fixed="true"]{color:#a9e3ff}
-    .cell.selected{outline:2px solid var(--accent)}
-    .cell.same{background:rgba(106,227,255,.08)}
-    .cell.related{background:rgba(255,255,255,.03)}
-    .cell.conflict{background:rgba(255,0,0,.1)}
-    .cell .notes{position:absolute;inset:3px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:2px;font-size:12px;color:#96a0cc}
-    .cell .notes span{display:flex;align-items:center;justify-content:center;opacity:.9}
-    .cell.invalid{color:var(--danger)}
-    /* thick subgrid borders */
-    .cell:nth-child(3n+1){border-left-width:2px}
-    .cell{border-right-width:1px}
-    .cell{border-bottom-width:1px}
-    .row-0 .cell, .row-3 .cell, .row-6 .cell{border-top-width:2px}
-    .col-0{border-left-width:2px}
-    .col-2, .col-5{border-right-width:2px}
-    .row-2 .cell, .row-5 .cell{border-bottom-width:2px}
+/* Sudoku board */
+.board{
+  width:420px;
+  max-width:94vw;
+  aspect-ratio:1;
+  border-radius:12px;
+  background:#0a0c18;
+  border:1px solid rgba(255,255,255,.08);
+  display:grid;
+  grid-template-columns:repeat(9,1fr);
+  grid-template-rows:repeat(9,1fr);
+  overflow:hidden
+}
+.cell{
+  position:relative;
+  border:1px solid rgba(255,255,255,.06);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:22px;
+  cursor:pointer;
+  user-select:none
+}
+.cell[data-fixed="true"]{color:#a9e3ff}
+.cell.selected{outline:2px solid var(--accent)}
+.cell.same{background:rgba(106,227,255,.08)}
+.cell.related{background:rgba(255,255,255,.03)}
+.cell.conflict{background:rgba(255,0,0,.1)}
+.cell .notes{
+  position:absolute;
+  inset:3px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  gap:2px;
+  font-size:12px;
+  color:#96a0cc
+}
+.cell .notes span{display:flex;align-items:center;justify-content:center;opacity:.9}
+.cell.invalid{color:var(--danger)}
+/* thick subgrid borders */
+.cell:nth-child(3n+1){border-left-width:2px}
+.cell{border-right-width:1px}
+.cell{border-bottom-width:1px}
+.row-0 .cell, .row-3 .cell, .row-6 .cell{border-top-width:2px}
+.col-0{border-left-width:2px}
+.col-2, .col-5{border-right-width:2px}
+.row-2 .cell, .row-5 .cell{border-bottom-width:2px}
 
-    .side{display:grid;gap:12px;align-content:start}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
-    .kbd{background:#12162a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 10px}
+.side{display:grid;gap:12px;align-content:start}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.kbd{background:#12162a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 10px}
 
-    .number-pad{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-    .number-pad button{padding:12px 0;font-size:16px}
+.number-pad{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px
+}
+.number-pad button{padding:12px 0;font-size:16px}
 
-    .footer{text-align:center;color:var(--muted);font-size:13px;margin-top:10px}
-    .stat{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--panel);border-radius:12px;border:1px solid rgba(255,255,255,.08)}
-  </style>
+.footer{text-align:center;color:var(--muted);font-size:13px;margin-top:10px}
+.stat{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 12px;
+  background:var(--panel);
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.08)
+}
+
+/* 📱 Responsive tweaks */
+@media (max-width: 600px){
+  .board{width:100%;max-width:100%;}
+  .cell{font-size:18px}
+  .number-pad{grid-template-columns:repeat(3,1fr)}
+  .number-pad button{padding:10px 0;font-size:14px}
+  header{flex-direction:column;align-items:flex-start}
+}
+
+@media (max-width: 400px){
+  .cell{font-size:14px}
+  .number-pad{grid-template-columns:repeat(2,1fr)}
+  .number-pad button{font-size:13px;padding:8px 0}
+  .controls{flex-direction:column;align-items:stretch}
+}
+
+</style>
 </head>
 <body>
   <div class="app">
@@ -87,20 +171,22 @@
     </header>
 
     <div class="layout">
+       <div class="card stat"><span>Time</span><strong id="timer">00:00</strong></div>
+        <div class="card stat"><span>Errors</span><strong id="errors">0</strong></div>
+       
       <section class="card">
         <div id="board" class="board" aria-label="Sudoku board"></div>
       </section>
 
       <aside class="side">
-        <div class="card stat"><span>Time</span><strong id="timer">00:00</strong></div>
-        <div class="card stat"><span>Errors</span><strong id="errors">0</strong></div>
-        <div class="card">
-          <strong>How to play</strong>
-          <p class="muted" style="margin:.5rem 0 0">Click a cell and type <span class="kbd">1–9</span> to fill. Use arrows to move, <span class="kbd">Del/Backspace</span> to clear. Toggle <b>Notes</b> to add pencil marks. Conflicts highlight automatically.</p>
-        </div>
+       
         <div class="card">
           <strong>Number pad</strong>
           <div class="number-pad" id="numPad"></div>
+        </div>
+         <div class="card">
+          <strong>How to play</strong>
+          <p class="muted" style="margin:.5rem 0 0">Click a cell and type <span class="kbd">1–9</span> to fill. Use arrows to move, <span class="kbd">Del/Backspace</span> to clear. Toggle <b>Notes</b> to add pencil marks. Conflicts highlight automatically.</p>
         </div>
        
       </aside>
