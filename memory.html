@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memory Card Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #controls {
+      margin: 15px 0;
+    }
+
+    select, button {
+      padding: 8px 12px;
+      font-size: 16px;
+      margin: 5px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+
+    #timer {
+      font-size: 18px;
+      margin: 10px;
+      font-weight: bold;
+    }
+
+   #game-board {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  margin: 10px auto;
+  gap: 2px; /* very small spacing */
+}
+
+/* Cards */
+.card {
+  width: 70px;       /* fixed compact size */
+  height: 70px;      /* square shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #4a90e2;
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 6px;
+  user-select: none;
+  transition: background 0.3s;
+}
+
+.card.flipped {
+  background: #f39c12;
+  color: #000;
+}
+
+    .card.matched {
+      background: lightgreen;
+      color: #333;
+      cursor: default;
+    }
+
+    .card:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <h1>🃏 Memory Card Game</h1>
+
+  <div id="controls">
+    <label for="difficulty">Select Difficulty:</label>
+    <select id="difficulty">
+      <option value="4">Easy (4x4)</option>
+      <option value="5">Medium (5x5)</option>
+      <option value="6">Hard (6x6)</option>
+    </select>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+
+  <div id="timer">Time: 0s</div>
+  <div id="game-board"></div>
+
+  <script>
+    let board = document.getElementById("game-board");
+    let timerDisplay = document.getElementById("timer");
+    let timer, time = 0;
+    let firstCard = null;
+    let lockBoard = false;
+    let matchedCount = 0;
+    let gridSize = 4;
+
+    function startGame() {
+      clearInterval(timer);
+      time = 0;
+      timerDisplay.textContent = "Time: 0s";
+      gridSize = parseInt(document.getElementById("difficulty").value);
+      board.innerHTML = "";
+      matchedCount = 0;
+
+      // Set grid style dynamically
+      board.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+
+      // Total cards (must be even, so if odd grid, make pairs accordingly)
+      let totalCards = gridSize * gridSize;
+      if (totalCards % 2 !== 0) totalCards--; 
+
+      // Generate numbers
+      let numbers = [];
+      for (let i = 1; i <= totalCards / 2; i++) {
+        numbers.push(i, i);
+      }
+
+      // Shuffle
+      numbers.sort(() => 0.5 - Math.random());
+
+      // Create cards
+      numbers.forEach(num => {
+        let card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.value = num;
+        card.innerHTML = "?";
+        card.addEventListener("click", flipCard);
+        board.appendChild(card);
+      });
+
+      // Start timer
+      timer = setInterval(() => {
+        time++;
+        timerDisplay.textContent = `Time: ${time}s`;
+      }, 1000);
+    }
+
+    function flipCard() {
+      if (lockBoard || this.classList.contains("flipped")) return;
+
+      this.classList.add("flipped");
+      this.innerHTML = this.dataset.value;
+
+      if (!firstCard) {
+        firstCard = this;
+      } else {
+        if (firstCard.dataset.value === this.dataset.value) {
+          firstCard.classList.add("matched");
+          this.classList.add("matched");
+          matchedCount += 2;
+          if (matchedCount === board.children.length) {
+            clearInterval(timer);
+            setTimeout(() => {
+              alert(`🎉 You Won! Time: ${time}s`);
+            }, 500);
+          }
+          firstCard = null;
+        } else {
+          lockBoard = true;
+          setTimeout(() => {
+            firstCard.classList.remove("flipped");
+            this.classList.remove("flipped");
+            firstCard.innerHTML = "?";
+            this.innerHTML = "?";
+            firstCard = null;
+            lockBoard = false;
+          }, 1000);
+        }
+      }
+    }
+  </script>
+</body>
+</html>

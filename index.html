@@ -2,472 +2,128 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maze Game</title>
+  <title>Game Hub</title>
   <style>
-   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-
-    body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; margin: 0; padding: 0; }
-
-
-@keyframes gradientBG {
-0% { background-position: 0% 50%; }
-50% { background-position: 100% 50%; }
-100% { background-position: 0% 50%; }
-} #info { margin: 10px; font-size: 18px; }
-    .touch-controls { display: flex; justify-content: center; margin-top: 15px; }
-    .touch-controls div { display: grid; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(3, 50px); gap: 5px; }
-    .touch-controls button { width: 50px; height: 50px; font-size: 20px; }
     body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: linear-gradient(135deg, #ADD8E6, #6495ED); /* Blue gradient */
-  margin: 0;
-  padding: 0;
-  color: #333; /* Darker text for better contrast */
- }
- 
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #fff;
+    }
 
- canvas {
-  display: block;
-  margin: 20px auto;
-  background: #fff;
-  border: 2px solid #2c3e50; /* Darker border */
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
- }
- 
+    header {
+      text-align: center;
+      padding: 20px;
+      font-size: 2rem;
+      font-weight: bold;
+    }
 
- .controls {
-  margin: 20px; /* Increased margin */
- }
- 
-
- label {
-  margin-right: 15px;
-  font-weight: bold;
- }
- 
-
- select {
-  padding: 8px;
-  border-radius: 5px;
-  border: 1px solid #2c3e50;
- }
- 
-
- button {
-  margin: 5px;
-  padding: 10px 20px; /* Increased padding */
-  cursor: pointer;
-  border-radius: 8px; /* More rounded corners */
-  border: none;
-  background-color: #3498db; /* Blue button */
-  color: white;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
- }
- 
-
- button:hover {
-  background-color: #2980b9;
- }
- 
-
- #info {
-  margin: 15px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #555;
- }
- 
-
- .touch-controls {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
- }
- 
-
- .touch-controls div {
+    #game-cards {
   display: grid;
-  grid-template-columns: repeat(3, 60px);
-  grid-template-rows: repeat(3, 60px);
-  gap: 8px;
- }
- 
-
- .touch-controls button {
-  width: 60px;
-  height: 60px;
-  font-size: 22px;
+  grid-template-columns: repeat(2, 1fr); /* Always 2 columns */
+  grid-template-rows: repeat(2, 1fr);   /* Always 2 rows */
+  gap: 20px;
+  padding: 20px;
+}
+#game-cards > .card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;   /* adjust as needed */
+  background: #f5f5f5;
   border-radius: 10px;
-  border: none;
-  background-color: #3498db;
-  color: white;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
- }
- 
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
 
- .touch-controls button:hover {
-  background-color: #2980b9;
- }
- #winPopup {
-position: fixed;
-top: 0; left: 0;
-width: 100%; height: 100%;
-background: rgba(0,0,0,0.6);
-display: flex;
-align-items: center;
-justify-content: center;
-visibility: hidden;
-opacity: 0;
-transition: opacity 0.3s;
-}
-#winPopup.show {
-visibility: visible;
-opacity: 1;
-}
-#winPopupContent {
-background: white;
-padding: 30px;
-border-radius: 12px;
-text-align: center;
-animation: popupScale 0.4s ease;
-}
-@keyframes popupScale {
-from { transform: scale(0.5); opacity: 0; }
-to { transform: scale(1); opacity: 1; }
-}
-#confetti {
-position: fixed;
-top: 0; left: 0;
-width: 100%; height: 100%;
-pointer-events: none;
-overflow: hidden;
-}
+
+    .card {
+      background: #fff;
+      color: #333;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    #game-container {
+      display: none;
+      padding: 20px;
+      background: #f9f9f9;
+      color: #000;
+      min-height: 70vh;
+      border-radius: 12px;
+      margin: 20px;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 15px;
+      padding: 10px 18px;
+      background: #2575fc;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: none;
+      border-radius: 12px;
+    }
   </style>
 </head>
 <body>
-  <h1>Maze Game</h1>
-  <div class="controls">
-    <label>Difficulty: 
-      <select id="difficulty">
-        <option value="10">Easy</option>
-        <option value="20">Medium</option>
-        <option value="30">Hard</option>
-      </select>
-    </label>
-    <label>Cell Size: 
-      <select id="cellSize">
-        <option value="20">20px</option>
-        <option value="25" selected>25px</option>
-        <option value="30">30px</option>
-      </select>
-    </label>
-    <button onclick="init()">Start New Maze</button>
-    <button onclick="showSolution()">Show Solution</button>
-    <button onclick="autoSolve()">Auto Solve</button>
-  </div>
-  <div class="layout">
-      <aside class="sidebar">
-        <div class="card">
-          <strong>How to play</strong>
-          <p class="muted" style="margin:.5rem 0 0">Use <b>WASD</b> or <b>arrow keys</b> to move the green square (player) to the red square (goal). Avoid walls. Toggle the shortest path hint or use Auto‑solve to see the answer.</p>
-          <div class="legend" style="margin-top:8px">
-            <span><i class="swatch player"></i>Player</span>
-            <span><i class="swatch goal"></i>Goal</span>
-            <span><i class="swatch path"></i>Shortest path</span>
-          </div>
-        </div>
-  <div id="info">Time: 0s | Moves: 0</div>
-  <canvas id="mazeCanvas"></canvas>
-  <div id="winPopup">
-<div id="winPopupContent">
-<h2>🎉 You Won! 🎉</h2>
-<p>Great job completing the maze!</p>
-<button onclick="playAgain()">Play Again</button>
-</div>
-</div>
 
+  <header>🎮 Game Hub</header>
 
-<div id="confetti"></div>
-
-  <div class="touch-controls">
-    <div>
-      <div></div>
-      <button onclick="move('up')">↑</button>
-      <div></div>
-      <button onclick="move('left')">←</button>
-      <div></div>
-      <button onclick="move('right')">→</button>
-      <div></div>
-      <button onclick="move('down')">↓</button>
-      <div></div>
+  <!-- Game Cards -->
+  <section id="game-cards">
+    <div class="card" onclick="openGame('sudoku.html')">
+      🧩 Sudoku
     </div>
-  </div>
+    <div class="card" onclick="openGame('memory.html')">
+      🃏 Memory Card Game
+    </div>
+    <div class="card" onclick="openGame('wordpuzzle.html')">
+      🔤 Word Search
+    </div>
+    <div class="card" onclick="openGame('maze.html')">
+      🔤 Maze Game
+    </div>
+    <!-- Add more games here -->
+  </section>
+
+  <!-- Game Container -->
+  <section id="game-container">
+    <button class="back-btn" onclick="goBack()">⬅ Back</button>
+    <iframe id="game-frame"></iframe>
+  </section>
 
   <script>
-    const canvas = document.getElementById("mazeCanvas");
-    const ctx = canvas.getContext("2d");
-    let rows, cols, grid, stack, cellSize, current, player, end, moves, timer, startTime;
-    let solutionPath = [];
-
-    class Cell {
-      constructor(row, col) {
-        this.row = row; this.col = col;
-        this.walls = { top: true, right: true, bottom: true, left: true };
-        this.visited = false;
-      }
-      draw() {
-        let x = this.col * cellSize;
-        let y = this.row * cellSize;
-        ctx.strokeStyle = "#000";
-        ctx.lineWidth = 2;
-        if (this.walls.top) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + cellSize, y); ctx.stroke(); }
-        if (this.walls.right) { ctx.beginPath(); ctx.moveTo(x + cellSize, y); ctx.lineTo(x + cellSize, y + cellSize); ctx.stroke(); }
-        if (this.walls.bottom) { ctx.beginPath(); ctx.moveTo(x + cellSize, y + cellSize); ctx.lineTo(x, y + cellSize); ctx.stroke(); }
-        if (this.walls.left) { ctx.beginPath(); ctx.moveTo(x, y + cellSize); ctx.lineTo(x, y); ctx.stroke(); }
-      }
+    function openGame(gameFile) {
+      document.getElementById("game-cards").style.display = "none";
+      document.getElementById("game-container").style.display = "block";
+      document.getElementById("game-frame").src = gameFile;
     }
 
-    function setupMaze() {
-      grid = []; stack = [];
-      for (let r = 0; r < rows; r++) {
-        let rowArr = [];
-        for (let c = 0; c < cols; c++) rowArr.push(new Cell(r, c));
-        grid.push(rowArr);
-      }
-      current = grid[0][0];
-      current.visited = true;
-      while (true) {
-        let next = checkNeighbors(current);
-        if (next) {
-          next.visited = true;
-          stack.push(current);
-          removeWalls(current, next);
-          current = next;
-        } else if (stack.length > 0) {
-          current = stack.pop();
-        } else break;
-      }
+    function goBack() {
+      document.getElementById("game-cards").style.display = "grid";
+      document.getElementById("game-container").style.display = "none";
+      document.getElementById("game-frame").src = "";
     }
-
-    function checkNeighbors(cell) {
-      let { row, col } = cell;
-      let neighbors = [];
-      if (row > 0) neighbors.push(grid[row - 1][col]);
-      if (row < rows - 1) neighbors.push(grid[row + 1][col]);
-      if (col > 0) neighbors.push(grid[row][col - 1]);
-      if (col < cols - 1) neighbors.push(grid[row][col + 1]);
-      neighbors = neighbors.filter(n => !n.visited);
-      if (neighbors.length > 0) return neighbors[Math.floor(Math.random() * neighbors.length)];
-      return undefined;
-    }
-
-    function removeWalls(a, b) {
-      let dx = a.col - b.col;
-      let dy = a.row - b.row;
-      if (dx === 1) { a.walls.left = false; b.walls.right = false; }
-      else if (dx === -1) { a.walls.right = false; b.walls.left = false; }
-      if (dy === 1) { a.walls.top = false; b.walls.bottom = false; }
-      else if (dy === -1) { a.walls.bottom = false; b.walls.top = false; }
-    }
-
-    function drawMaze() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) grid[r][c].draw();
-      ctx.fillStyle = "red";
-      ctx.fillRect(player.col * cellSize + 5, player.row * cellSize + 5, cellSize - 10, cellSize - 10);
-      ctx.fillStyle = "green";
-      ctx.fillRect(end.col * cellSize + 5, end.row * cellSize + 5, cellSize - 10, cellSize - 10);
-    }
-
-    function init() {
-      rows = cols = parseInt(document.getElementById("difficulty").value);
-      cellSize = parseInt(document.getElementById("cellSize").value);
-      canvas.width = cols * cellSize;
-      canvas.height = rows * cellSize;
-      setupMaze();
-      player = { row: 0, col: 0 };
-      end = { row: rows - 1, col: cols - 1 };
-      moves = 0;
-      startTime = Date.now();
-      if (timer) clearInterval(timer);
-      timer = setInterval(updateInfo, 1000);
-      drawMaze();
-    }
-
-    function updateInfo() {
-      let elapsed = Math.floor((Date.now() - startTime) / 1000);
-      document.getElementById("info").textContent = `Time: ${elapsed}s | Moves: ${moves}`;
-    }
-
-    function canMove(row, col, dir) {
-      let cell = grid[row][col];
-      if (dir === "up" && !cell.walls.top) return { row: row - 1, col };
-      if (dir === "down" && !cell.walls.bottom) return { row: row + 1, col };
-      if (dir === "left" && !cell.walls.left) return { row, col: col - 1 };
-      if (dir === "right" && !cell.walls.right) return { row, col: col + 1 };
-      return null;
-    }
-
-    function move(direction) {
-      let newPos = canMove(player.row, player.col, direction);
-      if (newPos) {
-        player = newPos;
-        moves++;
-        drawMaze();
-        updateInfo();
-        if (player.row === end.row && player.col === end.col) {
-          setTimeout(() => alert(`You Win! Moves: ${moves}`), 100);
-          clearInterval(timer);
-        }
-      }
-    }
-
-    document.addEventListener("keydown", e => {
-      if (["ArrowUp", "w", "W"].includes(e.key)) move("up");
-      else if (["ArrowDown", "s", "S"].includes(e.key)) move("down");
-      else if (["ArrowLeft", "a", "A"].includes(e.key)) move("left");
-      else if (["ArrowRight", "d", "D"].includes(e.key)) move("right");
-    });
-    function autoSolve() {
-  solutionPath = bfs();
-  let i = 0;
-  function step() {
-    if (i < solutionPath.length) {
-      player = {
-        row: solutionPath[i][0],
-        col: solutionPath[i][1]
-      };
-      drawMaze();
-      moves++; // Increment moves for each step
-      updateInfo(); // Update info for each step
-      
-      // Check for win condition after each move in auto-solve
-      if (player.row === end.row && player.col === end.col) {
-        clearInterval(timer);
-        setTimeout(() => alert(`You Win! Moves: ${moves} 🎉`), 100);
-      }
-      
-      i++;
-      setTimeout(step, 150);
-    }
-  }
-  step();
-}
-function move(direction) {
- let newPos = canMove(player.row, player.col, direction);
- if (newPos) {
- player = newPos;
- moves++;
- drawMaze();
- updateInfo();
- if (player.row === end.row && player.col === end.col) {
- clearInterval(timer);
- setTimeout(() => alert(`You Win! Moves: ${moves} 🎉`), 100); // Basic alert with an emoji
- }
- }
-}
-    function bfs() {
-      let queue = [[player.row, player.col]];
-      let visited = Array.from({ length: rows }, () => Array(cols).fill(false));
-      let parent = {};
-      visited[player.row][player.col] = true;
-      while (queue.length > 0) {
-        let [r, c] = queue.shift();
-        if (r === end.row && c === end.col) break;
-        [["up", -1, 0], ["down", 1, 0], ["left", 0, -1], ["right", 0, 1]].forEach(([dir, dr, dc]) => {
-          let next = canMove(r, c, dir);
-          if (next && !visited[next.row][next.col]) {
-            visited[next.row][next.col] = true;
-            parent[`${next.row},${next.col}`] = [r, c];
-            queue.push([next.row, next.col]);
-          }
-        });
-      }
-      let path = [], cur = [end.row, end.col];
-      while (cur) {
-        path.push(cur);
-        cur = parent[`${cur[0]},${cur[1]}`];
-      }
-      return path.reverse();
-    }
-
-    function showSolution() {
-      solutionPath = bfs();
-      drawMaze();
-      ctx.fillStyle = "rgba(0,0,255,0.3)";
-      solutionPath.forEach(([r, c]) => {
-        ctx.fillRect(c * cellSize + 5, r * cellSize + 5, cellSize - 10, cellSize - 10);
-      });
-    }
-
-    function autoSolve() {
-  solutionPath = bfs();
-  let i = 0;
-  function step() {
-    if (i < solutionPath.length) {
-      player = { row: solutionPath[i][0], col: solutionPath[i][1] };
-      drawMaze();
-      
-      // Update info and check for the win condition on each step
-      moves++;
-      updateInfo();
-      if (player.row === end.row && player.col === end.col) {
-        clearInterval(timer);
-        setTimeout(() => alert(`You Win! Moves: ${moves} 🎉`), 100);
-      }
-      
-      i++;
-      setTimeout(step, 150);
-    }
-  }
-  step();
-}
-// Win popup + confetti
-function showWin(){
-document.getElementById("winPopup").classList.add("show");
-launchConfetti();
-}
-
-
-function playAgain(){
-document.getElementById("winPopup").classList.remove("show");
-generateMaze();
-}
-
-
-function launchConfetti(){
-const confettiContainer = document.getElementById("confetti");
-confettiContainer.innerHTML="";
-for(let i=0;i<150;i++){
-const div = document.createElement("div");
-div.style.position="absolute";
-div.style.width="8px"; div.style.height="14px";
-div.style.background = `hsl(${Math.random()*360},100%,50%)`;
-div.style.top = "-20px";
-div.style.left = Math.random()*100+"%";
-div.style.opacity = 1;
-confettiContainer.appendChild(div);
-animateConfetti(div);
-}
-}
-function animateConfetti(el){
-let x = parseFloat(el.style.left);
-let y = -20;
-const fall = setInterval(()=>{
-y += 4+Math.random()*4;
-x += Math.random()*2-1;
-el.style.top = y+"px";
-el.style.left = x+"%";
-el.style.transform = `rotate(${y*5}deg)`;
-if(y>window.innerHeight){ clearInterval(fall); el.remove(); }
-},30);
-}
-    init();
   </script>
+
 </body>
 </html>
